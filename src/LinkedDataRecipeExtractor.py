@@ -8,9 +8,6 @@ from RecipeIngredient import RecipeIngredient
 from RecipeStep import RecipeStep
 import utils
 
-# pattern for invalid ingredients
-INGREDIENT_INVALID_PATTERN = re.compile(r'[\[\]]')
-
 def is_recipe_instruction(str):
     """
     Check `str` is a recipe instruction, or if it's more likely 
@@ -56,6 +53,13 @@ class LinkedDataRecipeExtractor(RecipeExtractor):
             instructions = self.ld['recipeInstructions'].split('\n')
             return [RecipeStep.from_str(i) 
                 for i in instructions if is_recipe_instruction(i)]
+            
+    def get_yield(self):
+        if 'recipeYield' in self.ld:
+            match = re.search('([0-9]+)', str(self.ld['recipeYield']))
+            if(len(match.groups())): return int(match.groups()[0])
+            
+        return 4
     
     def get_ingredients(self):
         ingredient_strs = self.ld['recipeIngredient']
@@ -74,27 +78,32 @@ class LinkedDataRecipeExtractor(RecipeExtractor):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('filename', help='path to HTML input file.')
-    parser.add_argument('-m', '--mod', 
-        help='ingredients modifier.', default='1')
+    parser.add_argument('filename', help='path to HTML input file')
+    parser.add_argument('-p', '--people', 
+        help='the number of people to base the recipe on', default='2')
     args = parser.parse_args()
     
-    with open(args.filename, encoding='utf8') as file:
+    with open(args.filename, encoding='utf8') as file:  
+        
         html_doc = file.read()
         extractor = LinkedDataRecipeExtractor(html_doc)
         
         print()
         print(extractor.get_name())
+        print(f'    for {args.people} people, use `-p N` to modify.')
         print()
         
         print('Steps:')
         for i, step in enumerate(extractor.get_steps()):
-            print(f'- {step.get_text()}')
+            prefix = f'{(f"{i+1})"):<3}'
+            print(f'{prefix} {step.get_text()}')
         print()
         
-        print('Ingredients:')
+        recipe_yield = extractor.get_yield()
+        yield_modifier = int(args.people) / recipe_yield
+        print(f'Ingredients:')
         for ingredient in extractor.get_ingredients():
-            print(f'- {ingredient.get_multiplied_text(float(args.mod))}')
+            print(f'- {ingredient.get_multiplied_text(yield_modifier)}')
         print()
     
    
