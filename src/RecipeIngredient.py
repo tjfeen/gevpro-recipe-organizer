@@ -29,7 +29,7 @@ class RecipeIngredient:
             else:
                 count_num = float(count_str)
                 
-            return f'{(count_num * modifier):g}'
+            return f'{round(count_num * modifier, 1):g}'
         return sub
     
     def get_multiplied_text(self, modifier = 1):       
