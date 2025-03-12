@@ -3,6 +3,6 @@ class RecipeExtractor:
         pass
     
     def get_steps(self):
-        """Extract recipe steps."""
+        """Get list of recipe steps."""
     
         
