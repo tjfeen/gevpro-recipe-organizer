@@ -26,8 +26,10 @@ class RecipeIngredient:
             elif(',' in count_str):
                 # Replace comma with period
                 count_num = float(count_str.replace(',', '.'))
-            else:
+            elif count_str.isnumeric():
                 count_num = float(count_str)
+            else:
+                return count_str
                 
             return f'{round(count_num * modifier, 1):g}'
         return sub
