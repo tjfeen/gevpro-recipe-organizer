@@ -20,7 +20,7 @@
     "Test3": {
         "ingredients": "3",
         "instructions": "1",
-        "rating": 0,
+        "rating": 1,
         "note": ""
     }
 }

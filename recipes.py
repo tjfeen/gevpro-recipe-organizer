@@ -52,77 +52,49 @@ elif page == "Saved Recipes":
     if not st.session_state["recipes"]:
         st.write("No recipes saved yet.")
     else:
-        search_query = st.text_input("Search for a savrecipe")
+        search_query = st.text_input("Search for a recipe")
         filtered_recipes = {k: v for k, v in st.session_state["recipes"].items() if search_query.lower() in k.lower()}
-        
-        for recipe, data in list(filtered_recipes.items()):  # Use list() to allow removal
+
+        if not filtered_recipes:
+            st.write("No recipes found for your search.")
+
+        for recipe, data in filtered_recipes.items():
             st.subheader(recipe)
             st.write(f"**Ingredients:**\n{data['ingredients']}")
             st.write(f"**Instructions:**\n{data['instructions']}")
 
-            # Inject CSS and JavaScript for star rating
-            star_html = """
-            <style>
-                .star-container {
-                    display: flex;
-                    gap: 5px;
-                }
-                .star {
-                    font-size: 30px;
-                    cursor: pointer;
-                    color: #888;  /* Default gray */
-                    text-shadow: 0px 0px 4px rgba(255, 255, 255, 0.5); /* Soft glow */
-                    transition: color 0.2s ease-in-out, text-shadow 0.2s ease-in-out;
-                }
-                .selected {
-                    color: gold;
-                    text-shadow: 0px 0px 8px rgba(255, 215, 0, 0.8); /* Gold glow */
-                }
-            </style>
-            <script>
-                function selectStars(recipe, value) {
-                    fetch('/?recipe=' + recipe + '&rating=' + value, {method: 'POST'});
-                    localStorage.setItem(recipe + '_rating', value);
-                    for (let i = 1; i <= 5; i++) {
-                        let star = document.getElementById(recipe + '_star_' + i);
-                        star.className = (i <= value) ? 'star selected' : 'star';
-                    }
-                }
-                document.addEventListener("DOMContentLoaded", function() {
-                    document.querySelectorAll(".star-container").forEach(container => {
-                        let recipe = container.getAttribute("data-recipe");
-                        let savedRating = localStorage.getItem(recipe + '_rating');
-                        if (savedRating) {
-                            for (let i = 1; i <= 5; i++) {
-                                let star = document.getElementById(recipe + '_star_' + i);
-                                star.className = (i <= savedRating) ? 'star selected' : 'star';
-                            }
-                        }
-                    });
-                });
-            </script>
-            """
-
+            # Display the current rating with radio buttons (1 to 5 stars), but allow 0 as well
             rating = st.session_state["recipes"].get(recipe, {}).get("rating", 0)
-            stars = f'<div class="star-container" data-recipe="{recipe}">' + "".join(
-                f'<span id="{recipe}_star_{i}" class="star {"selected" if i <= rating else ""}" onclick="selectStars(\'{recipe}\', {i})">&#9733;</span>'
-                for i in range(1, 6)
-            ) + '</div>'
+            rating_options = ["No Rating", "1 star", "2 stars", "3 stars", "4 stars", "5 stars"]
 
-            st.components.v1.html(star_html + stars, height=50)
+            # Radio buttons for selecting the rating (horizontal display)
+            new_rating = st.radio(f"Rate {recipe}", options=rating_options, index=rating, key=f"rating_{recipe}", horizontal=True)
 
+            # Adjust new_rating to reflect the correct index (1-based for stars)
+            if new_rating != "No Rating":
+                new_rating_value = rating_options.index(new_rating)
+            else:
+                new_rating_value = 0
+
+            # Update rating if it's changed
+            if new_rating_value != rating:
+                st.session_state["recipes"][recipe]["rating"] = new_rating_value
+                save_recipes(st.session_state["recipes"])  # Save updated rating to recipes.json
+                st.success(f"Rating for '{recipe}' updated to {new_rating_value} stars!" if new_rating_value > 0 else f"Rating for '{recipe}' removed!")
+
+            # Display and update notes
             note = st.text_area(f"Notes for {recipe}", value=data["note"])
 
-            # Buttons in a row with minimal spacing
-            col1, col2 = st.columns([1, 1])  # Evenly distributed columns
+            # Buttons in a row
+            col1, col2 = st.columns(2)  # Create two columns for the buttons to be placed horizontally
             with col1:
                 if st.button(f"Save {recipe}", key=f"save_{recipe}"):
                     st.session_state["recipes"][recipe]["note"] = note
-                    st.session_state["recipes"][recipe]["rating"] = rating
                     save_recipes(st.session_state["recipes"])
-                    st.success(f"Saved '{recipe}'!")
+                    st.success(f"Saved notes for '{recipe}'!")
 
             with col2:
                 if st.button(f"Remove {recipe}", key=f"remove_{recipe}"):
                     del st.session_state["recipes"][recipe]
                     save_recipes(st.session_state["recipes"])
+                    st.success(f"Removed '{recipe}'!")
