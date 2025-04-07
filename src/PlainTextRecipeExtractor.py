@@ -1,43 +1,49 @@
-from RecipeExtractor import RecipeExtractor
-from bs4 import BeautifulSoup
-import argparse
 import re
-import json
+from RecipeExtractor import RecipeExtractor
 from RecipeIngredient import RecipeIngredient, INGREDIENT_PATTERN
-import utils
+from RecipeStep import RecipeStep
 
 class PlainTextRecipeExtractor(RecipeExtractor):
-    def __init__(self, text):
-        self.text = text
-
+    def _load(self):
+        data = self.get_data()
+        
+        # match ingredients
+        ingredient_matches = INGREDIENT_PATTERN.findall(data)
+        ingredients = [RecipeIngredient(self.recipe, ' '.join(match))
+                       for match in ingredient_matches]
+        
+        # remove ingredients form text
+        data = re.sub(INGREDIENT_PATTERN, '', data)
+        lines = data.split('\n')
+        
+        # find title (first line longer than 3 chars)
+        title_index = None
+        for index, line in enumerate(lines):
+            if(len(line.strip()) > 3):
+                title_index = index
+                break
+        
+        # steps are all lines longer than 20 chars
+        steps = []
+        for index, line in enumerate(lines):
+            if(index == title_index): continue
+            if(len(line.strip()) <= 20): continue
+            steps.append(RecipeStep(self.recipe, line))
+        
+        self.extracted_data = {
+            'ingredients': ingredients,
+            'title': lines[title_index],
+            'steps': steps
+        }
+        
+    def get_yield(self):
+        return 4
+        
     def get_steps(self):
-        pass
+        return self.extracted_data['steps']
+    
+    def get_title(self):
+        return self.extracted_data['title']
     
     def get_ingredients(self):
-        ingredient_matches = INGREDIENT_PATTERN.findall(self.text)
-        return [RecipeIngredient.from_str(' '.join(m)) 
-            for m in ingredient_matches]
-        
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('filename')
-    args = parser.parse_args()
-    
-    with open(args.filename, encoding='utf8') as file:
-        html_doc = file.read()
-        extractor = PlainTextRecipeExtractor(html_doc)
-        
-        print('Name: ', end='')
-        print(extractor.get_name())
-        print()
-        
-        print('Steps:')
-        print(extractor.get_steps())
-        
-        print('Ingredients:')
-        print(extractor.get_ingredients())
-    
-   
-if __name__ == '__main__':
-    main()
+        return self.extracted_data['ingredients']

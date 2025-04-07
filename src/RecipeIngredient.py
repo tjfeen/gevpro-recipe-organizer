@@ -1,16 +1,12 @@
 import re
 
-INGREDIENT_PATTERN = re.compile(r"^ *([0-9\.,/]+)\s*([A-z']+) *([A-z' ()+0-9-]*)", re.M)
-INGREDIENT_COUNT_PATTERN = re.compile(r'([0-9\/,.]+)')
+INGREDIENT_PATTERN = re.compile(r"^ *([0-9\.,/]+)\s*([A-z']+) *([\S ]*)", re.M)
+INGREDIENT_COUNT_PATTERN = re.compile(r'([0-9]+[0-9\/,.]*)')
 
 class RecipeIngredient:
-    def __init__(self, text = ''):       
-        if text:
-            self.text = re.sub(r' +', ' ', text.strip())
-        
-    @staticmethod
-    def from_str(str):       
-        return RecipeIngredient(str)
+    def __init__(self, recipe, text = ''):     
+        self.recipe = recipe  
+        self.text = re.sub(r' +', ' ', text.strip()) if text else ''
     
     def sub_callback(self, modifier):
         def sub(match):
@@ -33,12 +29,13 @@ class RecipeIngredient:
                 
             return f'{round(count_num * modifier, 1):g}'
         return sub
-    
-    def get_multiplied_text(self, modifier = 1):       
-        return INGREDIENT_COUNT_PATTERN.sub(self.sub_callback(modifier), self.text)
+            
+    def get_text(self, people_count = 1):
+        recipe_yield = self.recipe.extractor.get_yield()
+        yield_modifier = people_count / recipe_yield
         
-    def get_text(self):
-        return f'{self.get_multiplied_text(1)}'
+        return INGREDIENT_COUNT_PATTERN.sub(
+            self.sub_callback(yield_modifier), self.text)
     
     def is_valid(self):
         if(not len(self.text)): return False
