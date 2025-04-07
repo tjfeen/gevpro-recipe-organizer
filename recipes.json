@@ -1,9 +1,26 @@
-[
-    {
-        "name": "test",
-        "ingredients": [
-            "hoi123"
-        ],
-        "instructions": "hoi"
+{
+    "t": {
+        "ingredients": "t",
+        "instructions": "t",
+        "rating": 1,
+        "note": ""
+    },
+    "pizza2": {
+        "ingredients": "pizza2",
+        "instructions": "pizza2",
+        "rating": 1,
+        "note": "test"
+    },
+    "pizza3": {
+        "ingredients": "pizza3",
+        "instructions": "pizza3",
+        "rating": 1,
+        "note": "L"
+    },
+    "Test3": {
+        "ingredients": "3",
+        "instructions": "1",
+        "rating": 0,
+        "note": ""
     }
-]
+}
