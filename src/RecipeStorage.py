@@ -14,6 +14,7 @@ class RecipeStorage:
             return []  
         
     def add(self, recipe):
+        """Add a Recipe to the storage."""
         data = self.read()
         data.append(recipe.serialize())
         

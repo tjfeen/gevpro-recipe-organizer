@@ -29,8 +29,9 @@ class RecipeIngredient:
                 
             return f'{round(count_num * modifier, 1):g}'
         return sub
-            
+    
     def get_text(self, people_count = 1):
+        """Get the display text for the ingredient, for a given number of people."""
         recipe_yield = self.recipe.extractor.get_yield()
         yield_modifier = people_count / recipe_yield
         
@@ -38,6 +39,7 @@ class RecipeIngredient:
             self.sub_callback(yield_modifier), self.text)
     
     def is_valid(self):
+        """Check if the ingredient has been parsed correctly."""
         if(not len(self.text)): return False
         if('[object Object]' in self.text): return False
         return True
