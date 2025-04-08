@@ -1,4 +1,4 @@
 beautifulsoup4
-streamlit
+streamlit == 1.43
 pandas
 requests
