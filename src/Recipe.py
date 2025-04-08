@@ -1,9 +1,17 @@
-from LinkedDataRecipeExtractor import LinkedDataRecipeExtractor
-from PlainTextRecipeExtractor import PlainTextRecipeExtractor
+from src.LinkedDataRecipeExtractor import LinkedDataRecipeExtractor
+from src.PlainTextRecipeExtractor import PlainTextRecipeExtractor
+from src.JSONRecipeExtractor import JSONRecipeExtractor
+import random
+import json
 import argparse
+
 
 class Recipe:
     def __init__(self, data):
+        if 'id' not in data:
+            # set recipe id to random hex string
+            data['id'] = format(random.getrandbits(64), f'0{64 // 4}x')
+
         self.data = data
         self.extractor = self._find_extractor()
 
@@ -12,31 +20,48 @@ class Recipe:
         if LinkedDataRecipeExtractor.accepts(self):
             return LinkedDataRecipeExtractor(self)
 
+        if (JSONRecipeExtractor.accepts(self)):
+            return JSONRecipeExtractor(self)
+
         return PlainTextRecipeExtractor(self)
-    
+
+    def get_source(self):
+        """Get the source data of the recipe."""
+        return self.data['source']
+
     def get_title(self):
         """Get the title of the recipe."""
         return self.extractor.get_title()
-    
+
     def get_steps(self):
         """Get the how-to steps of the recipe."""
         return self.extractor.get_steps()
-    
+
     def get_ingredients(self):
         """Get the ingredients needed for the recipe."""
         return self.extractor.get_ingredients()
 
+    def get_id(self):
+        return self.data['id']
+
+    def get_rating(self):
+        if 'rating' not in self.data:
+            return 0
+        return self.data['rating']
+
+    def set_rating(self, rating):
+        self.data['rating'] = rating
+
     def serialize(self):
-        return {
-            'data': self.data
-        }
+        return self.data
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', help='path to HTML input file')
     parser.add_argument('-p', '--people',
-                        help='the number of people to base the recipe on', default='2')
+                        help='the number of people to base the recipe on',
+                        default='2')
     args = parser.parse_args()
 
     with open(args.filename, encoding='utf8') as file:
