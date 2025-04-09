@@ -7,10 +7,12 @@ st.markdown('# Write a recipe 📝')
 source = {}
 source['title'] = st.text_input('Title', placeholder='Your delicious recipe')
 source['ingredients'] = st.text_area(
-    'Ingredients', placeholder='The ingredients you need...')
+    'Ingredients', placeholder='The ingredients you need...'
+                               '(Use enter to seperate each ingredient)...')
 source['steps'] = st.text_area(
-    'Steps', placeholder='The steps to make this delicious food...')
-source['yield'] = st.number_input('How many people does this recipe serve?', 
+    'Steps', placeholder='The steps to make this delicious food '
+                         '(Use enter to seperate each step)...')
+source['yield'] = st.number_input('How many people does this recipe serve?',
                                   value=4)
 
 if st.button('Save'):
