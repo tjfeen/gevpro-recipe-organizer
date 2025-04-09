@@ -16,12 +16,12 @@ pg.run()
 
 st.write("""
     <style>
-        [class*="st-key-flex"] { 
-            display: flex; 
-            flex-direction: row; 
+        [class*="st-key-flex"] {
+            display: flex;
+            flex-direction: row;
         }
-        
-        [class*="st-key-align_right"] { 
+
+        [class*="st-key-align_right"] {
             margin-left: auto;
         }
     </style>

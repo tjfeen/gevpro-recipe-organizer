@@ -75,7 +75,7 @@ def main():
 
         print('Steps:')
         for i, step in enumerate(recipe.get_steps()):
-            prefix = f'{(f"{i+1})"):<3}'
+            prefix = f'{(f"{i + 1})"):<3}'
             print(f'{prefix} {step.get_text()}')
         print()
 

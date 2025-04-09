@@ -16,7 +16,7 @@ class RecipeStorage:
         try:
             with open(self.filepath, 'r+') as file:
                 return json.loads(file.read())
-        except:
+        except BaseException:
             return []
 
     def get_recipes(self):

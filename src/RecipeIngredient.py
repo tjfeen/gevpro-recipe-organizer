@@ -32,7 +32,10 @@ class RecipeIngredient:
         return sub
 
     def get_text(self, people_count=1):
-        """Get the display text for the ingredient, for a given number of people."""
+        """
+        Get the display text for the ingredient,
+        for a given number of people.
+        """
         recipe_yield = self.recipe.extractor.get_yield()
         yield_modifier = people_count / recipe_yield
 
